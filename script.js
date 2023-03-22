@@ -1,170 +1,179 @@
-const registerCourseBtn = document.getElementById("registerCourseBtn");
-const saveCourseBtn = document.getElementById("saveCourseBtn");
-const numOfPlayers = document.getElementById("numOfPlayers");
-const selectCourse = document.getElementById("selectCourse");
-const selectCourseBtn = document.getElementById("selectCourseBtn");
-const holesInfo = document.getElementById("holesInfo");
-const playerInfo = document.getElementById("playerInfo");
-const scorecard = document.getElementById("scorecard");
+document.getElementById("confirm-player-count").addEventListener("click", function() {
+    const playerCount = document.getElementById("player-count").value;
+    const playerDetailsContainer = document.getElementById("player-details-container");
+    playerDetailsContainer.innerHTML = "";
 
-function createCourseHoles() {
-    holesInfo.innerHTML = "";
-    for (let i = 1; i <= 18; i++) {
-        const holeInfo = document.createElement("div");
-        holeInfo.innerHTML = `
-            <label>ホール${i}:</label>
-            <input type="number" id="par${i}" placeholder="パー">
-            <input type="number" id="length${i}" placeholder="ホールの長さ">
+    for (let i = 0; i < playerCount; i++) {
+        const playerDiv = document.createElement("div");
+        playerDiv.innerHTML = `
+            <label>プレーヤー${i + 1}:</label>
+            <input type="text" id="player-name-${i}">
+            <label>ハンデキャップ:</label>
+            <input type="number" id="player-handicap-${i}" value="0">
         `;
-        holesInfo.appendChild(holeInfo);
+        playerDetailsContainer.appendChild(playerDiv);
     }
-}
 
-function saveCourse() {
-    const courseName = document.getElementById("courseName").value;
-    if (courseName === "") {
-        alert("コース名を入力してください");
-        return;
+    document.getElementById    ("player-details").style.display = "block";
+});
+
+document.getElementById("confirm-player-details").addEventListener("click", function() {
+    const playerCount = document.getElementById("player-count").value;
+    const scoreInputContainer = document.getElementById("score-input-container");
+    const playerNamesRow = document.getElementById("player-names-row");
+    scoreInputContainer.innerHTML = "";
+    playerNamesRow.innerHTML = "";
+
+    const playerNames = [];
+    for (let i = 0; i < playerCount; i++) {
+        playerNames.push(document.getElementById(`player-name-${i}`).value);
     }
-    const courseData = {
-        name: courseName,
-        holes: []
-    };
-    for (let i = 1; i <= 18; i++) {
-        const par = document.getElementById(`par${i}`).value;
-        const length = document.getElementById(`length${i}`).value;
-        if (par === "" || length === "") {
-            alert(`ホール${i}の情報を入力してください`);
-            return;
+
+    document.getElementById("player-names-heading").setAttribute("colspan", playerCount);
+    for (let i = 0; i < playerCount; i++) {
+        const playerNameHeading = document.createElement("th");
+        playerNameHeading.textContent = playerNames[i];
+        playerNamesRow.appendChild(playerNameHeading);
+    }
+
+    for (let i = 0; i < 18; i++) {
+        const holeRow = document.createElement("tr");
+
+        holeRow.innerHTML = `
+            <td>${i + 1}</td>
+            <td><input type="number" id="hole-${i}-par" class="par-input"></td>
+            <td><input type="number" id="hole-${i}-distance" class="distance-input"></td>
+        `;
+
+        for (let j = 0; j < playerCount; j++) {
+            const scoreInput = document.createElement("td");
+            scoreInput.innerHTML = `<input type="number" id="player-${j}-hole-${i}-score">`;
+            holeRow.appendChild(scoreInput);
         }
-        courseData.holes.push({
-            par: parseInt(par),
-            length: parseInt(length)
-        });
+
+        scoreInputContainer.appendChild(holeRow);
     }
-    const storedCourses = JSON.parse(localStorage.getItem("courses")) || [];
-    storedCourses.push(courseData);
-    localStorage.setItem("courses", JSON.stringify(storedCourses));
-    updateCourseSelection();
-}
 
-function updateCourseSelection() {
-    selectCourse.innerHTML = '<option value="" disabled selected>コース選択</option>';
-    const storedCourses = JSON.parse(localStorage.getItem("courses")) || [];
-    storedCourses.forEach((course, index) => {
-        const option = document.createElement("option");
-        option.value = index;
-        option.innerText = course.name;
-        selectCourse.appendChild(option);
-    });
-}
+    document.getElementById("score-input").style.display = "block";
+    document.getElementById("player-names-header").style.display = "block";
 
-function createPlayerInputs() {
-    playerInfo.innerHTML = "";
-    const n = parseInt(numOfPlayers.value);
-    for (let i = 1; i <= n; i++) {
-        const playerInput = document.createElement("div");
-        playerInput.innerHTML = `
-            <label>プレーヤー${i}:</label>
-            <input type="text" id="playerName${i}" placeholder="名前">
-            <input type="number" id="handicap${i}" placeholder="ハンデキャップ" value="0">
-            <button id="setPlayerName${i}">名前決定</button>
-        `;
-        playerInfo.appendChild(playerInput);
-        document.getElementById(`setPlayerName${i}`).addEventListener("click", () => {
-            const playerName = document.getElementById(`playerName${i}`).value;
-            if (playerName === "") {
-                alert("プレーヤー名を入力してください");
-                return;
+    const parInputs = document.getElementsByClassName("par-input");
+    const distanceInputs = document.getElementsByClassName("distance-input");
+
+    for (let i = 0; i < parInputs.length; i++) {
+        parInputs[i].addEventListener("input", updateTotalPar);
+        distanceInputs[i].addEventListener("input", updateTotalDistance);
+    }
+
+
+
+    for (let i = 0; i < 18; i++) {
+        for (let j = 0; j < playerCount; j++) {
+            const scoreInput = document.getElementById(`player-${j}-hole-${i}-score`);
+            scoreInput.addEventListener("input", updatePlayerScores);
+        }
+    }
+    updatePlayerScores();
+
+});
+
+
+
+function updateTotalPar() {
+    const parInputs = document.getElementsByClassName("par-input");
+    let totalPar = 0;
+    let outPar = 0;
+    let inPar = 0;
+
+    for (let i = 0; i < parInputs.length; i++) {
+        if (parInputs[i].value) {
+            totalPar += parseInt(parInputs[i].value);
+            if (i < 9) {
+                outPar += parseInt(parInputs[i].value);
+            } else {
+                inPar += parseInt(parInputs[i].value);
             }
-            document.getElementById(`playerName${i}`).disabled = true;
-            document.getElementById(`handicap${i}`).disabled = true;
-            document.getElementById(`setPlayerName${i}`).disabled = true;
-        });
+        }
     }
+
+    document.getElementById("out-par").innerText = outPar;
+    document.getElementById("in-par").innerText = inPar;
+    document.getElementById("total-par").innerText = totalPar;
 }
 
-function createScorecard() {
-    const n = parseInt(numOfPlayers.value);
-    const courseIndex = parseInt(selectCourse.value);
-    const storedCourses = JSON.parse(localStorage.getItem("courses")) || [];
-    const courseData = storedCourses[courseIndex];
-    let scorecardHtml = `
-        <table>
-            <tr>
-                <th>ホール</th>
-                <th>パー</th>
-                <th>長さ</th>
-    `;
-    for (let i = 1; i <= n; i++) {
-        scorecardHtml += `<th>プレーヤー${i}</th>`;
+function updateTotalDistance() {
+    const distanceInputs = document.getElementsByClassName("distance-input");
+    let totalDistance = 0;
+    let outDistance = 0;
+    let inDistance = 0;
+
+    for (let i = 0; i < distanceInputs.length; i++) {
+        if (distanceInputs[i].value) {
+            totalDistance += parseInt(distanceInputs[i].value);
+            if (i < 9) {
+                outDistance += parseInt(distanceInputs[i].value);
+            } else {
+                inDistance += parseInt(distanceInputs[i].value);
+            }
+        }
     }
-    scorecardHtml += "</tr>";
 
-    for (let i = 1; i <= 18; i++) {
-        scorecardHtml += `
-            <tr>
-                <td>${i}</td>
-                <td>${courseData.holes[i - 1].par}</td>
-                <td>${courseData.holes[i - 1].length}</td>
-        `;
-        for (let j = 1; j <= n; j++)        {
-          scorecardHtml += `<td><input type="number" id="player${j}hole${i}" class="player${j}"></td>`;
-      }
-      scorecardHtml += "</tr>";
-  }
-  scorecardHtml += "</table>";
-  scorecard.innerHTML = scorecardHtml;
-
-  const totalBtn = document.createElement("button");
-  totalBtn.innerText = "合計表示";
-  scorecard.appendChild(totalBtn);
-
-  totalBtn.addEventListener("click", () => {
-      let totalHtml = `
-          <table>
-              <tr>
-                  <th>合計</th>
-                  <th>Out</th>
-                  <th>In</th>
-                  <th>Total</th>
-              </tr>
-              <tr>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-              </tr>
-          </table>
-      `;
-      const totalTable = document.createElement("div");
-      totalTable.innerHTML = totalHtml;
-      scorecard.appendChild(totalTable);
-
-      for (let i = 1; i <= n; i++) {
-          let outTotal = 0;
-          let inTotal = 0;
-          for (let j = 1; j <= 18; j++) {
-              const score = parseInt(document.getElementById(`player${i}hole${j}`).value) || 0;
-              if (j <= 9) {
-                  outTotal += score;
-              } else {
-                  inTotal += score;
-              }
-          }
-          totalTable.querySelector("tr:nth-child(2)").innerHTML += `
-              <td>${outTotal}</td>
-              <td>${inTotal}</td>
-              <td>${outTotal + inTotal}</td>
-          `;
-      }
-  });
+    document.getElementById("out-distance").innerText = outDistance;
+    document.getElementById("in-distance").innerText = inDistance;
+    document.getElementById("total-distance").innerText = totalDistance;
 }
 
-registerCourseBtn.addEventListener("click", createCourseHoles);
-saveCourseBtn.addEventListener("click", saveCourse);
-numOfPlayers.addEventListener("change", createPlayerInputs);
-selectCourseBtn.addEventListener("click", createScorecard);
-updateCourseSelection();
+function updatePlayerScores() {
+    const playerCount = document.getElementById("player-count").value;
+    const outRow = document.getElementById("out-row");
+    const inRow = document.getElementById("in-row");
+    const totalRow = document.getElementById("total-row");
+    const playerScoreTemplate = document.getElementById("player-score-template");
 
+    let playerOutScores = [];
+    let playerInScores = [];
+    let playerTotalScores = [];
+
+    for (let i = 0; i < playerCount; i++) {
+        playerOutScores.push(0);
+        playerInScores.push(0);
+        playerTotalScores.push(0);
+    }
+
+    for (let i = 0; i < 18; i++) {
+        for (let j = 0; j < playerCount; j++) {
+            const scoreInput = document.getElementById(`player-${j}-hole-${i}-score`);
+            if (scoreInput.value) {
+                const score = parseInt(scoreInput.value);
+                playerTotalScores[j] += score;
+                if (i < 9) {
+                    playerOutScores[j] += score;
+                } else {
+                    playerInScores[j] += score;
+                }
+            }
+        }
+    }
+
+    outRow.innerHTML = '<td>Out</td><td id="out-par"></td><td id="out-distance"></td>';
+    inRow.innerHTML = '<td>In</td><td id="in-par"></td><td id="in-distance"></td>';
+    totalRow.innerHTML = '<td>全トータル</td><td id="total-par"></td><td id="total-distance"></td>';
+
+    for (let i = 0; i < playerCount; i++) {
+        const outScoreCell = playerScoreTemplate.content.cloneNode(true);
+        outScoreCell.querySelector(".player-score").innerText = playerOutScores[i];
+        outRow.appendChild(outScoreCell);
+
+        const inScoreCell = playerScoreTemplate.content.cloneNode(true);
+        inScoreCell.querySelector(".player-score").innerText = playerInScores[i];
+        inRow.appendChild(inScoreCell);
+
+        const totalScoreCell = playerScoreTemplate.content.cloneNode(true);
+        totalScoreCell.querySelector(".player-score").innerText = playerTotalScores[i];
+        totalRow.appendChild(totalScoreCell);
+    }
+
+    updateTotalPar();
+    updateTotalDistance();
+}
 
