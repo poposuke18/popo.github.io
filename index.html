@@ -1,24 +1,16 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ゴルフスコア記録</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Golf Scorecard</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="courseRegistration">
-        <h1>コース登録</h1>
-        <input type="text" id="courseName" placeholder="コース名">
-        <button id="registerCourseBtn">コース登録</button>
-        <div id="holesInfo"></div>
-        <button id="saveCourseBtn">コース保存</button>
-    </div>
-
-    <div id="playerRegistration">
-        <h1>プレーヤー登録</h1>
-        <select id="numOfPlayers">
-            <option value="" disabled selected>プレーヤー数選択</option>
+    <h1>Golf Scorecard</h1>
+    <div id="player-selection">
+        <label for="player-count">プレーヤー数:</label>
+        <select id="player-count">
             <option value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -26,19 +18,55 @@
             <option value="5">5</option>
             <option value="6">6</option>
         </select>
-        <div id="playerInfo"></div>
+        <button id="confirm-player-count">人数確定</button>
     </div>
-
-    <div id="courseSelection">
-        <h1>コース選択</h1>
-        <select id="selectCourse">
-            <option value="" disabled selected>コース選択</option>
-        </select>
-        <button id="selectCourseBtn">コース決定</button>
+    <div id="player-details" style="display: none;">
+        <h2>プレーヤー情報入力</h2>
+        <div id="player-details-container"></div>
+        <button id="confirm-player-details">名前決定</button>
     </div>
-
-    <div id="scorecard"></div>
-    
+    <div id="score-input" style="display: none;">
+        <h2>スコア入力</h2>
+        <label for="course-name">コース名:</label>
+        <input type="text" id="course-name">
+        <div id="player-names-header" style="display: none;"></div>
+        <table id="score-table">
+            <thead>
+                <tr>
+                    <th rowspan="2">ホール</th>
+                    <th rowspan="2">パー数</th>
+                    <th rowspan="2">距離 (ヤード)</th>
+                    <th colspan="6" id="player-names-heading">プレーヤー名</th>
+                </tr>
+                <tr id="player-names-row"></tr>
+            </thead>
+            <tbody id="score-input-container">
+            </tbody>
+            <tfoot>
+                <tr id="out-row">
+                    <td>Out</td>
+                    <td id="out-par"></td>
+                    <td id="out-distance"></td>
+                    <td colspan="6" id="player-out-scores"></td>
+                </tr>
+                <tr id="in-row">
+                    <td>In</td>
+                    <td id="in-par"></td>
+                    <td id="in-distance"></td>
+                    <td colspan="6" id="player-in-scores"></td>
+                </tr>
+                <tr id="total-row">
+                    <td>全トータル</td>
+                    <td id="total-par"></td>
+                    <td id="total-distance"></td>
+                    <td colspan="6" id="player-total-scores"></td>
+                </tr>
+                <template id="player-score-template">
+                    <td class="player-score"></td>
+                </template>
+            </tfoot>
+        </table>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
