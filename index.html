@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ゴルフスコア記録</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="courseRegistration">
+        <h1>コース登録</h1>
+        <input type="text" id="courseName" placeholder="コース名">
+        <button id="registerCourseBtn">コース登録</button>
+        <div id="holesInfo"></div>
+        <button id="saveCourseBtn">コース保存</button>
+    </div>
+
+    <div id="playerRegistration">
+        <h1>プレーヤー登録</h1>
+        <select id="numOfPlayers">
+            <option value="" disabled selected>プレーヤー数選択</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </select>
+        <div id="playerInfo"></div>
+    </div>
+
+    <div id="courseSelection">
+        <h1>コース選択</h1>
+        <select id="selectCourse">
+            <option value="" disabled selected>コース選択</option>
+        </select>
+        <button id="selectCourseBtn">コース決定</button>
+    </div>
+
+    <div id="scorecard"></div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
